@@ -9,6 +9,7 @@
 import UIKit
 import GooglePlaces
 import MapKit
+import Contacts
 
 class SpotDetailViewController: UIViewController {
     
@@ -23,6 +24,8 @@ class SpotDetailViewController: UIViewController {
     
     var spot: Spot!
     let regionDistance: CLLocationDistance = 750 //750 meters, 1/2 mile
+    var locationManager: CLLocationManager!
+    var currentLocation: CLLocation!
     
 
     override func viewDidLoad() {
@@ -32,6 +35,7 @@ class SpotDetailViewController: UIViewController {
         
         if spot == nil {
             spot = Spot()
+            getLocation()
         }
         let region = MKCoordinateRegion(center: spot.coordinate, latitudinalMeters: regionDistance, longitudinalMeters: regionDistance)
         mapView.setRegion(region, animated: true)
@@ -67,6 +71,8 @@ class SpotDetailViewController: UIViewController {
     }
     
     @IBAction func saveButtonPressed(_ sender: UIBarButtonItem) {
+        spot.name = nameField.text!
+        spot.address = addressField.text!
         spot.saveData { success in
             if success {
                 self.leaveViewController()
@@ -115,6 +121,63 @@ extension SpotDetailViewController: GMSAutocompleteViewControllerDelegate {
     
     func didUpdateAutocompletePredictions(_ viewController: GMSAutocompleteViewController) {
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
+    }
+    
+}
+
+extension SpotDetailViewController: CLLocationManagerDelegate {
+    
+    func getLocation() {
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+    }
+    
+    func handleLocationAuthorizationStatus(status: CLAuthorizationStatus) {
+        switch status {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            locationManager.requestLocation()
+        case .denied:
+            print("I'm sorry. Can't show location. User has not authorized it.")
+        case .restricted:
+            print("Access denied. Likely parental controls are restricting location services.")
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        handleLocationAuthorizationStatus(status: status)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard spot.name == "" else {
+            return
+        }
+        let geoCoder = CLGeocoder()
+        var name = ""
+        var address = ""
+        currentLocation = locations.last
+        spot.coordinate = currentLocation.coordinate
+        
+        geoCoder.reverseGeocodeLocation(currentLocation, completionHandler: {placemarks, error in
+            if placemarks != nil {
+                let placemark = placemarks!.last
+                name = placemark?.name ?? "name unknown"
+                //need to import contacts to use this code:
+                if let postalAdress = placemark?.postalAddress {
+                    address = CNPostalAddressFormatter.string(from: postalAdress, style: .mailingAddress)
+                }
+                
+            } else {
+                print("Error retrieving place")// Error Code\(error)")
+            }
+            self.spot.name = name
+            self.spot.address = address
+            self.updateInterface()
+        })
+    }
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Failed to get user location")
     }
     
 }
