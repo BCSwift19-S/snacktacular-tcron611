@@ -8,21 +8,49 @@
 
 import UIKit
 import CoreLocation
+import Firebase
+import FirebaseUI
+import GoogleSignIn
 
 class SpotsListViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     var spots: Spots!
+    var authUI: FUIAuth!
     
     override func viewDidLoad() {
+        super.viewDidLoad()
+        // You need to adopt a FUIAuthDelegate protocol to receive callback
+        authUI = FUIAuth.defaultAuthUI()
+        authUI?.delegate = self
+        
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.isHidden = true
         
-        super.viewDidLoad()
         spots = Spots()
         spots.spotArray.append(Spot(name: "El Pelon", address: "Comm. Ave", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: ""))
         spots.spotArray.append(Spot(name: "Shake Shack", address: "The Street - Chestnut Hill", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: ""))
         spots.spotArray.append(Spot(name: "Pino's Pizza", address: "Cleveland Circle", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: ""))
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        signIn()
+    }
+    
+    func signIn() {
+        let providers: [FUIAuthProvider] = [
+            FUIGoogleAuth(), FUIEmailAuth()
+            ]
+        _ = authUI.auth?.currentUser
+        if authUI.auth?.currentUser == nil {
+            self.authUI?.providers = providers
+            present(authUI.authViewController(), animated: true, completion: nil)
+        } else {
+            tableView.isHidden = false
+        }
+
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -36,6 +64,19 @@ class SpotsListViewController: UIViewController {
             }
         }
     }
+    
+    @IBAction func signOutPressed(_ sender: UIBarButtonItem) {
+        do {
+            try authUI!.signOut()
+            print("^^^^^Successfully signed out!")
+            signIn()
+        } catch {
+            tableView.isHidden = true
+            print("ERROR")
+        }
+    }
+    
+    
 }
 
 extension SpotsListViewController: UITableViewDelegate, UITableViewDataSource {
@@ -51,7 +92,38 @@ extension SpotsListViewController: UITableViewDelegate, UITableViewDataSource {
         return 60
     }
     
+}
+
+extension SpotsListViewController: FUIAuthDelegate {
+    func application(_ app: UIApplication, open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool {
+        let sourceApplication = options[UIApplication.OpenURLOptionsKey.sourceApplication] as! String?
+        if FUIAuth.defaultAuthUI()?.handleOpen(url, sourceApplication: sourceApplication) ?? false {
+            return true
+        }
+        // other URL handling goes here.
+        return false
+    }
     
+    func authUI(_ authUI: FUIAuth, didSignInWith user: User?, error: Error?) {
+        if let user = user {
+            tableView.isHidden = false
+            print("***** We signed in with user \(user.email ?? "unknown email")")
+        }
+    }
     
+    func authPickerViewController(forAuthUI authUI: FUIAuth) -> FUIAuthPickerViewController {
+        let loginViewController = FUIAuthPickerViewController(authUI: authUI)
+        loginViewController.view.backgroundColor = UIColor.white
+        let marginInsets: CGFloat = 16
+        let imageHeight: CGFloat = 225
+        let imageY = self.view.center.y - imageHeight
+        let logoFrame = CGRect(x: self.view.frame.origin.x + marginInsets, y: imageY, width: self.view.frame.width - (marginInsets * 2) , height: imageHeight)
+        let logoImageView = UIImageView(frame: logoFrame)
+        logoImageView.image = UIImage(named: "logo")
+        logoImageView.contentMode = .scaleAspectFit
+        loginViewController.view.addSubview(logoImageView)
+        return loginViewController
+    }
 }
 
