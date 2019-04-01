@@ -9,8 +9,9 @@
 import Foundation
 import CoreLocation
 import Firebase
+import MapKit
 
-class Spot {
+class Spot: NSObject, MKAnnotation {
     var name: String
     var address: String
     var coordinate: CLLocationCoordinate2D
@@ -25,6 +26,14 @@ class Spot {
     var latitude: CLLocationDegrees {
         return coordinate.latitude
     }
+    var title: String? {
+        return name
+    }
+    var subtitle: String? {
+        return address
+    }
+    
+    
     var dictionary: [String: Any] {
         return ["name": name, "address": address, "longitude": longitude, "latitude": latitude, "averageRating": averageRating, "numberOfReviews": numberOfReviews, "postingUserID" : postingUserID]
     }
@@ -40,9 +49,23 @@ class Spot {
         self.documentID = documentID
     }
     
-    convenience init() {
+    convenience override init() {
         self.init(name: "", address: "", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: "")
     }
+    
+    convenience init(dictionary: [String: Any]) {
+        let name = dictionary["name"] as! String? ?? ""
+        let address = dictionary["address"] as! String? ?? ""
+        let latitude = dictionary["latitude"] as! CLLocationDegrees? ?? 0.0
+        let longitude = dictionary["longitude"] as! CLLocationDegrees? ?? 0.0
+        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        let averageRating = dictionary["averageRating"] as! Double? ?? 0.0
+        let numberOfReviews = dictionary["numberOfReviews"] as! Int? ?? 0
+        let postingUserID = dictionary["postingUserID"] as! String? ?? ""
+        
+        self.init(name: name, address: address, coordinate: coordinate, averageRating: averageRating, numberOfReviews: numberOfReviews, postingUserID: postingUserID, documentID: "")
+    }
+    
     func saveData(completed: @escaping (Bool) -> ()) {
         let db = Firestore.firestore()
         //Grab user ID
