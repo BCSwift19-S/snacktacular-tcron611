@@ -28,4 +28,7 @@ class Spot {
         self.documentID = documentID
     }
     
+    convenience init() {
+        self.init(name: "", address: "", coordinate: CLLocationCoordinate2D(), averageRating: 0.0, numberOfReviews: 0, postingUserID: "", documentID: "")
+    }
 }

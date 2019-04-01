@@ -9,5 +9,5 @@
 import Foundation
 
 class Spots {
-    var spotsArray = [Spot]()
+    var spotArray = [Spot]()
 }
