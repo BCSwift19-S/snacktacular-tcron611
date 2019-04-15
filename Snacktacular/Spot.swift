@@ -81,8 +81,10 @@ class Spot: NSObject, MKAnnotation {
             let ref = db.collection("spots").document(self.documentID)
             ref.setData(dataToSave) { (error) in
                 if let error = error {
+                    print("*** ERROR: updating document \(self.documentID) \(error.localizedDescription)")
                     completed(false)
                 } else {
+                    print("^^ Document updated with ref ID \(ref.documentID)")
                     completed(true)
                 }
             }
@@ -90,9 +92,11 @@ class Spot: NSObject, MKAnnotation {
             var ref: DocumentReference? = nil
             ref = db.collection("spots").addDocument(data: dataToSave) { error in
                 if let error = error {
-                    print(error.localizedDescription)
+                    print("*** ERROR: creating new document \(error.localizedDescription)")
                     completed(false)
                 } else {
+                    print("^^^ new document created with ref ID \(ref?.documentID ?? "unknown")")
+                    self.documentID = ref!.documentID
                     completed(true)
                 }
             }
