@@ -29,7 +29,16 @@ class Review {
         self.date = date
         self.documentID = documentID
     }
-    
+    convenience init(dictionary: [String: Any]) {
+        let title = dictionary["title"]as! String? ?? ""
+        let text = dictionary["text"]as! String? ?? ""
+        let rating = dictionary["rating"] as! Int? ?? 0
+        let reviwerUserID = dictionary["reviewerUserID"] as! String
+        let timestamp = dictionary["date"] as? Timestamp //Added this to fix error, date was of type Timestamp so needed to convert in order to work.
+        let date = timestamp!.dateValue()
+       // let date = dictionary["date"] as! Date? ?? Date()
+        self.init(title: title, text: text, rating: rating, reviewerUserID: reviwerUserID, date: date, documentID: "")
+    }
     convenience init() {
         let currentUserID = Auth.auth().currentUser?.email ?? "Unknown User"
         self.init(title: "", text: "", rating: 0, reviewerUserID: currentUserID, date: Date(), documentID: "")
