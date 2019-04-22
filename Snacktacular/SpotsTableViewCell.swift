@@ -20,12 +20,16 @@ class SpotsTableViewCell: UITableViewCell {
     
     func configureCell(spot: Spot) {
         nameLabel.text = spot.name
+        if spot.averageRating == 0.0 {
+            ratingLabel.text = "Avg. Rating: -.-"
+        } else {
+            ratingLabel.text = "Avg. Rating: " + String(spot.averageRating)
+        }
         guard let currentLocation = currentLocation else {
             return
         }
         let distanceInMeters = currentLocation.distance(from: spot.location)
         let distanceString = "Distance: \(( distanceInMeters * 0.00062137).roundTo(places: 2)) miles"
-        distanceLabel.text = distanceString
     }
     
     

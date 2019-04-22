@@ -76,10 +76,7 @@ class SpotDetailViewController: UIViewController {
         reviews.loadData(spot: spot) {
             self.tableView.reloadData()
             if self.reviews.reviewArray.count > 0 {
-                var totalRating = 0
-                for review in self.reviews.reviewArray {
-                    totalRating = totalRating + review.rating
-                }
+                let totalRating = self.reviews.reviewArray.reduce(0) {$0 + $1.rating}
                 let averageRating = Double(totalRating) / Double(self.reviews.reviewArray.count)
                 self.averageRatingLabel.text = "\(averageRating.roundTo(places: 1))"
             } else {
