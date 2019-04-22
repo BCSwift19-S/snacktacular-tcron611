@@ -51,7 +51,7 @@ class Review {
             let ref = db.collection("spots").document(spot.documentID).collection("reviews").document(self.documentID)
             ref.setData(dataToSave) { (error) in
                 if let error = error {
-                     print("*** ERROR: updating document \(self.documentID) in spot \(spot.documentID) \(error.localizedDescription)")
+                     print("*** Error: updating document \(self.documentID) in spot \(spot.documentID) \(error.localizedDescription)")
                     completed(false)
                 } else {
                     print("^^ Document updated with ref ID \(ref.documentID)")
@@ -62,7 +62,7 @@ class Review {
             var ref: DocumentReference? = nil
             ref = db.collection("spots").document(spot.documentID).collection("reviews").addDocument(data: dataToSave) { error in
                 if let error = error {
-                    print("*** ERROR: creating new document in spot \(spot.documentID) for new review DocumentID \(error.localizedDescription)")
+                    print("*** Error: creating new document in spot \(spot.documentID) for new review DocumentID \(error.localizedDescription)")
                     completed(false)
                 } else {
                     print("^^^ new document created with ref ID \(ref?.documentID ?? "unknown")")
@@ -72,4 +72,17 @@ class Review {
             }
         }
     }
+    
+    func deleteData(spot: Spot, completed: @escaping (Bool) -> ()) {
+        let db = Firestore.firestore()
+        db.collection("spots").document(spot.documentID).collection("reviews").document(documentID).delete() { error in
+            if let error = error {
+                print("***Error: deleting review documentID \(self.documentID) \(error.localizedDescription)")
+                completed(false)
+            } else {
+                completed(true)
+            }
+        }
+    }
+    
 }

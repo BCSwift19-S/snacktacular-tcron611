@@ -680,12 +680,12 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" leftItemsSupplementBackButton="YES" id="fJX-Vd-ftZ">
-                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="fiQ-gw-3Na">
+                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="fiQ-gw-3Na">
                             <connections>
                                 <action selector="cancelButtonPressed:" destination="FXH-82-eel" id="CsV-XD-0xx"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="jOq-cE-13g">
+                        <barButtonItem key="rightBarButtonItem" title="Save" id="jOq-cE-13g">
                             <connections>
                                 <action selector="saveButtonPressed:" destination="FXH-82-eel" id="ROc-Ai-H5P"/>
                             </connections>
@@ -712,7 +712,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="yGx-dj-e1B" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3990" y="35"/>
+            <point key="canvasLocation" x="3842" y="-13"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="16M-u3-wsL">
